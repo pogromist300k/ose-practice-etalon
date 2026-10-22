@@ -26,7 +26,9 @@ LINKER  = link.ld
 VBR_SRC    = $(SRC)/boot.asm
 KERNEL_SRC = $(SRC)/kernel.c
 VBR_OBJ    = $(TMP)/boot.o
-KERNEL_OBJ = $(TMP)/kernel.o
+C_SRCS     = $(wildcard $(SRC)/*.c)
+C_OBJS     = $(patsubst $(SRC)/%.c, $(TMP)/%.o, $(C_SRCS))
+HDRS       = $(wildcard $(SRC)/*.h)
 OS_ELF     = $(TMP)/os.elf
 OS_BIN     = $(TMP)/os.bin
 IMAGE      = boot.img
@@ -38,16 +40,16 @@ all: build
 
 # --- Объектные файлы ---------------------------------------------------------
 
-$(VBR_OBJ): $(VBR_SRC) $(KERNEL_OBJ) | $(TMP)
-	$(NASM) $(NASMFLAGS) -dN=$$(stat -c%s $(KERNEL_OBJ)) $< -o $@
+$(VBR_OBJ): $(VBR_SRC) $(C_OBJS) | $(TMP)
+	$(NASM) $(NASMFLAGS) -dN=$$(du -cb $(C_OBJS) | tail -1 | cut -f1) $< -o $@
 
-$(KERNEL_OBJ): $(KERNEL_SRC) | $(TMP)
+$(TMP)/%.o: $(SRC)/%.c $(HDRS) | $(TMP)
 	$(GCC) $(CFLAGS) -c $< -o $@
 
 # --- Линковка и бинарь -------------------------------------------------------
 
-$(OS_ELF): $(VBR_OBJ) $(KERNEL_OBJ) $(LINKER)
-	$(LD) $(LDFLAGS) $(VBR_OBJ) $(KERNEL_OBJ) -o $@
+$(OS_ELF): $(VBR_OBJ) $(C_OBJS) $(LINKER)
+	$(LD) $(LDFLAGS) $(VBR_OBJ) $(C_OBJS) -o $@
 
 $(OS_BIN): $(OS_ELF)
 	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
