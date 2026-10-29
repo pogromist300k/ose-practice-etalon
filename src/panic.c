@@ -22,8 +22,8 @@ void kernel_panic(const char* fmt, ...) {
 
 void vkernel_panic(const char* fmt, va_list args) {
   cpu_cli();
-  vga_set_color(VGA_BLUE, VGA_WHITE);
-  printer_init();
+  
+  printer_init_color(VGA_BLUE, VGA_WHITE);
   printf("%s\n\n ", panic_art);
   vprintf(fmt, args);
   cpu_halt();

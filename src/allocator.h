@@ -3,13 +3,7 @@
 
 #include "types.h"
 
-typedef enum {
-  ALLOC_ERR_ALIGNMENT,
-  ALLOC_ERR_OOM
-} AllocError;
-
 void* malloc_undead(size_t size, size_t alignment);
 void* calloc_undead(size_t size, size_t alignment);
-AllocError get_alloc_error();
 
 #endif

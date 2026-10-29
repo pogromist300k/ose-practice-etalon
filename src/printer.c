@@ -5,8 +5,8 @@
 #define NIBBLES_MAX 8
 
 static struct {
-  byte x;
-  byte y;
+  size_t x;
+  size_t y;
 } cursor;
 
 static void newline();
@@ -30,16 +30,16 @@ void printer_init_color(VgaColor bg, VgaColor fg) {
 
 //------------------------CURSOR (PUBLIC)-------------------------
 
-void printer_set_cursor(byte x, byte y) {
+void printer_set_cursor(size_t x, size_t y) {
   cursor.x = x % VGA_COLS;
   cursor.y = y % VGA_ROWS;
 }
 
-byte printer_get_cursor_x() {
+size_t printer_get_cursor_x() {
   return cursor.x;
 }
 
-byte printer_get_cursor_y() {
+size_t printer_get_cursor_y() {
   return cursor.y;
 }
 
@@ -113,7 +113,7 @@ static void print_hex(unsigned num) {
 }
 
 static void print_pointer(void* ptr) {
-  char buff[NIBBLES_MAX] = "00000000";
+  char buff[NIBBLES_MAX] = {'0', '0', '0', '0', '0', '0', '0', '0'};
   print_char_move_cursor('0');
   print_char_move_cursor('x');
   fill_hex_buff((uintptr_t)ptr, buff);

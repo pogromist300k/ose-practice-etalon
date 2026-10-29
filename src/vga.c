@@ -13,7 +13,7 @@ void vga_clear_screen() {
   memsetw((void*)VGA_START, vga_color | ' ', VGA_ROWS*VGA_COLS);
 }
 
-void vga_print_char(int c, byte x, byte y) {
+void vga_print_char(int c, size_t x, size_t y) {
   *(VGA_START + y*VGA_COLS + x) = vga_color | (byte)c;
 }
 

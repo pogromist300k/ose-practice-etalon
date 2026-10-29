@@ -5,9 +5,9 @@
 #include "types.h"
 #include "vga.h"
 
-void printer_set_cursor(byte x, byte y);
-byte printer_get_cursor_x();
-byte printer_get_cursor_y();
+void printer_set_cursor(size_t x, size_t y);
+size_t printer_get_cursor_x();
+size_t printer_get_cursor_y();
 void printer_init();
 void printer_init_color(VgaColor bg, VgaColor fg);
 void printf(const char* fmt, ...);

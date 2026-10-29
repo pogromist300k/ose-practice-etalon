@@ -27,7 +27,7 @@ typedef enum {
 
 void vga_set_color(VgaColor bg, VgaColor fg);
 void vga_clear_screen();
-void vga_print_char(int c, byte x, byte y);
+void vga_print_char(int c, size_t x, size_t y);
 void vga_scroll_down();
 
 #endif
