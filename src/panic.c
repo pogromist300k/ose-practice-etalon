@@ -1,6 +1,5 @@
 #include "panic.h"
 #include "printer.h"
-#include "vga.h"
 #include "cpu.h"
 
 static const char panic_art[] =
@@ -22,9 +21,8 @@ void kernel_panic(const char* fmt, ...) {
 
 void vkernel_panic(const char* fmt, va_list args) {
   cpu_cli();
-  
   printer_init_color(VGA_BLUE, VGA_WHITE);
-  printf("%s\n\n ", panic_art);
+  printf("%s\n\n", panic_art);
   vprintf(fmt, args);
   cpu_halt();
 }

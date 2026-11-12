@@ -1,7 +1,7 @@
 #ifndef INCLUDE_GUARD_VGA_H
 #define INCLUDE_GUARD_VGA_H
 
-#include "types.h"
+#include "defs.h"
 
 #define VGA_ROWS 25
 #define VGA_COLS 80
@@ -27,7 +27,7 @@ typedef enum {
 
 void vga_set_color(VgaColor bg, VgaColor fg);
 void vga_clear_screen();
-void vga_print_char(int c, size_t x, size_t y);
+void vga_print_char(byte c, size_t x, size_t y);
 void vga_scroll_down();
 
 #endif

@@ -1,9 +1,6 @@
 [BITS 16]
 
-%define CODE 0x0008
-%define DATA 0x0010
-
-;========================LOAD KERNEL========================
+;======================= LOAD KERNEL =======================
 
 cli
 mov CX, 1                    ; CH: cylinder number (C)  CL: sector number (S)
@@ -35,7 +32,7 @@ read:
 error:
   jmp $
 
-;=================SWITCH TO PROTECTED MODE==================
+;================ SWITCH TO PROTECTED MODE =================
 
 switch_pm:
 lgdt [GDT_descriptor]
@@ -46,12 +43,12 @@ mov EAX, CR0
 bts EAX, 0
 mov CR0, EAX
 
-jmp CODE:next
+jmp CODE_SELECTOR:next
 next:
 
 [BITS 32]
 
-mov AX, DATA
+mov AX, DATA_SELECTOR
 mov DS, AX
 mov ES, AX
 mov SS, AX
@@ -59,9 +56,10 @@ mov FS, AX
 mov GS, AX
 
 [EXTERN kernel_entry]
+; void kernel_entry()
 call kernel_entry
 
-;=================GLOBAL DESCRIPTORS TABLE==================
+;================ GLOBAL DESCRIPTORS TABLE =================
 
 GDT_descriptor:
   dw 23
@@ -74,21 +72,48 @@ GDT:
   dq 0x00CF9A000000FFFF
   dq 0x00CF92000000FFFF
 
-;=========================UTILITIES=========================
+;======================== UTILITIES ========================
 
-[GLOBAL spin_wait]
-; void spin_wait(size_t cycles)
-spin_wait:
-  mov  ecx, dword[esp + 4]
+;--------------------------- CPU ---------------------------
+
+[GLOBAL cpu_cli]
+; void cpu_cli()
+cpu_cli:
+  cli
+  ret
+
+[GLOBAL cpu_sti]
+; void cpu_sti()
+cpu_sti:
+  sti
+  ret
+
+[GLOBAL cpu_halt]
+; void cpu_hlt()
+cpu_halt:
+  cli
+  hlt
+
+[GLOBAL cpu_lidt]
+; void cpu_lidt(IDTD* idtd)
+cpu_lidt:
+  mov eax, dword[esp + 4]
+  lidt [eax]
+  ret
+
+[GLOBAL cpu_wait]
+; void cpu_wait(size_t cycles)
+cpu_wait:
+  mov ecx, dword[esp + 4]
   test ecx, ecx
-  jz  .ret
+  jz .ret
  .wait:
     pause
     loop .wait
  .ret:
   ret
 
-;--------------------------MEMORY---------------------------
+;------------------------- MEMORY --------------------------
 
 [GLOBAL memmove]
 ; void* memmove(void* dst, const void* src, size_t n)

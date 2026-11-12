@@ -3,33 +3,33 @@
 #include "mem.h"
 #include "panic.h"
 
-static struct {
-  byte* cur;
-  byte* end;
-} heap = {(byte*)0x00100000, (byte*)0x00400000};
+#define HEAP_START ((byte*)0x00100000)
+#define HEAP_END   ((byte*)0x00400000)
 
-static byte* align_up(size_t alignment);
+static byte* heap = HEAP_START;
+
+static const char bad_alignment_fmt[] = " Allocation failed: alignment %u is not a power of 2";
+static const char oom_fmt[] = " Allocation failed: tried to allocate %u bytes, but only left %u bytes";
+
+static byte* align_up(size_t alignment) {
+  byte* aligned = (byte*)((uintptr_t)heap & (uintptr_t)-alignment);
+  if (aligned != heap)
+    aligned += alignment;
+  return (byte*)aligned;
+}
 
 void* malloc_undead(size_t size, size_t alignment) {
   if (!is_power_of_2(alignment))
-    return NULL;
+    kernel_panic(bad_alignment_fmt, alignment);
   byte* ptr = align_up(alignment);
-  if (ptr == NULL || heap.end <= ptr || heap.end - ptr < size)
-    return NULL;
-  heap.cur = ptr + size;
+  if (HEAP_END <= ptr || HEAP_END - ptr < size)
+    kernel_panic(oom_fmt, size, HEAP_END <= ptr ? 0 : (uintptr_t)(HEAP_END - ptr));
+  heap = ptr + size;
   return (void*)ptr;
 }
 
 void* calloc_undead(size_t size, size_t alignment) {
   void* ptr = malloc_undead(size, alignment);
-  if (ptr)
-    memset(ptr, 0, size);
+  memset(ptr, 0, size);
   return ptr;
-}
-
-static byte* align_up(size_t alignment) {
-  byte* aligned = (byte*)((uintptr_t)heap.cur & ~((uintptr_t)(alignment - 1)));
-  if (aligned != heap.cur)
-    aligned += alignment;
-  return (byte*)aligned;
 }
