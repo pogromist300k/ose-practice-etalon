@@ -13,6 +13,6 @@ void test() {
 
   interrupts_init();
   printf(" Let me divide by zero...");
-  sleep(50);
+  sleep(100);
   div_zero();
 }

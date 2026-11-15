@@ -14,7 +14,7 @@ void test() {
 
   interrupts_init();
   printf(" sti()...");
-  sleep(50);
+  sleep(100);
   cpu_sti();
-  cpu_halt();
+  sleep(1000);
 }

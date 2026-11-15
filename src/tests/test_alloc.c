@@ -2,9 +2,9 @@
 #include "allocator.h"
 #include "utils.h"
 
-#define SIZE 1
-#define ALIGNMENT 16
-#define COUNT 2
+#define SIZE      7
+#define ALIGNMENT 4
+#define COUNT     20
 
 void test() {
   printer_init_color(VGA_LIGHT_BLUE, VGA_WHITE);
@@ -15,10 +15,8 @@ void test() {
 
   byte* start = (byte*)malloc_undead(SIZE, ALIGNMENT);
   printf(" %p\n", start);
-  for (size_t _ = 1; _ < COUNT; _++) {
-    sleep(1);
+  for (size_t _ = 1; _ < COUNT; _++)
     printf(" %p\n", malloc_undead(SIZE, ALIGNMENT));
-  }
   byte* end = (byte*)malloc_undead(1, 1);
   size_t allocated = (size_t)(end - start);
   printf(" Bytes allocated: %u >= %u (%s)", allocated, COUNT * SIZE, allocated >= COUNT * SIZE ? "TRUE" : "FALSE");

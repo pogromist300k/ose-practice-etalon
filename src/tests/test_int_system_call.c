@@ -13,6 +13,6 @@ void test() {
 
   interrupts_init();
   printf(" Let's make a system call...");
-  sleep(50);
+  sleep(100);
   sys_call();
 }

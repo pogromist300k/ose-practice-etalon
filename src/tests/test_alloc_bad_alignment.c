@@ -2,10 +2,10 @@
 #include "allocator.h"
 #include "utils.h"
 
-#define SIZE 1
+#define SIZE            1
 #define START_ALIGNMENT 1
-#define END_ALIGNMENT 2 << 19
-#define BAD_ALIGNMENT 42
+#define END_ALIGNMENT   1 << 20
+#define BAD_ALIGNMENT   42
 
 void test() {
   printer_init_color(VGA_LIGHT_BLUE, VGA_WHITE);
@@ -20,6 +20,6 @@ void test() {
   }
   printf("\n Now triggering panic with bad alignment..."
          "\n   >> malloc_undead(%u, %u);", SIZE, BAD_ALIGNMENT);
-  sleep(70);
+  sleep(100);
   malloc_undead(SIZE, BAD_ALIGNMENT); 
 }

@@ -2,11 +2,11 @@
 #include "allocator.h"
 #include "utils.h"
 
-#define SIZE 12345
-#define ALIGNMENT 1
+#define SIZE       1488
+#define ALIGNMENT  1
 #define HEAP_START ((byte*)0x00100000)
-#define HEAP_END ((byte*)0x00400000)
-#define HEAP_SIZE (size_t)(HEAP_END - HEAP_START)
+#define HEAP_END   ((byte*)0x00400000)
+#define HEAP_SIZE  (size_t)(HEAP_END - HEAP_START)
 
 void test() {
   printer_init_color(VGA_LIGHT_BLUE, VGA_WHITE);
@@ -22,6 +22,6 @@ void test() {
   }
   printf("\n Now triggering panic..."
          "\n   >> malloc_undead(%u, %u);", SIZE, ALIGNMENT);
-  sleep(70);
+  sleep(100);
   malloc_undead(SIZE, ALIGNMENT);
 }
