@@ -2,7 +2,7 @@
 #define INCLUDE_GUARD_PRINTER_H
 
 #include <stdarg.h>
-#include "defs.h"
+#include "def.h"
 #include "vga.h"
 
 void printer_init();

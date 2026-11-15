@@ -2,7 +2,7 @@
 #define INCLUDE_GUARD_PANIC_H
 
 #include <stdarg.h>
-#include "defs.h"
+#include "def.h"
 
 void kernel_panic(const char* fmt, ...);
 void vkernel_panic(const char* fmt, va_list args);

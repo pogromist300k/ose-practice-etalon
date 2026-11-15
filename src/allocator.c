@@ -22,8 +22,10 @@ void* malloc_undead(size_t size, size_t alignment) {
   if (!is_power_of_2(alignment))
     kernel_panic(bad_alignment_fmt, alignment);
   byte* ptr = align_up(alignment);
-  if (HEAP_END <= ptr || HEAP_END - ptr < size)
-    kernel_panic(oom_fmt, size, HEAP_END <= ptr ? 0 : (uintptr_t)(HEAP_END - ptr));
+  if (HEAP_END <= ptr)
+    kernel_panic(oom_fmt, size, 0);
+  if (HEAP_END - ptr < size)
+    kernel_panic(oom_fmt, size, (uintptr_t)(HEAP_END - ptr));
   heap = ptr + size;
   return (void*)ptr;
 }

@@ -2,7 +2,7 @@
 #include "string.h"
 #include "mem.h"
 
-#define WIDTH_MAX VGA_COLS
+#define WIDTH_MAX 256
 
 typedef struct {
   const char* prefix;
@@ -52,9 +52,9 @@ void vprintf(const char* fmt, va_list args) {
     }
 
     bool left_align = false;
-    bool prefix = false;
-    bool zeros = false;
-    size_t width = 0;
+    bool prefix     = false;
+    bool zeros      = false;
+    size_t width    = 0;
 
     for (c = fmt[++i]; c == '-' || c == '#' || c == '0'; c = fmt[++i]) {
       if (c == '-')

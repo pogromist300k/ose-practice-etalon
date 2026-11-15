@@ -1,7 +1,7 @@
 #ifndef INCLUDE_GUARD_MEM_H
 #define INCLUDE_GUARD_MEM_H
 
-#include "defs.h"
+#include "def.h"
 
 void* memmove(void* dst, const void* src, size_t n);
 void* memset(void* dst, int b, size_t n);

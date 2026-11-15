@@ -1,7 +1,7 @@
 #ifndef INCLUDE_GUARD_VGA_H
 #define INCLUDE_GUARD_VGA_H
 
-#include "defs.h"
+#include "def.h"
 
 #define VGA_ROWS 25
 #define VGA_COLS 80

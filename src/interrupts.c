@@ -1,12 +1,12 @@
-#include "defs.h"
+#include "def.h"
 #include "allocator.h"
-#include "panic.h"
 #include "string.h"
 #include "cpu.h"
+#include "panic.h"
 #include "vector_pushers.h"
 
-#define ID_NUM 256
-#define ID_SIZE 8
+#define ID_NUM        256
+#define ID_SIZE       8
 #define IDT_ALIGNMENT 8
 
 typedef enum {
@@ -71,11 +71,19 @@ static const char context_fmt[] =
 void cpu_lidt(IDTD* idtd);
 
 static bool has_err_code(u32 vector) {
-  u32 vectors[] = {8, 10, 11, 12, 13, 14, 17, 21};
-  for (size_t i = 0; i < sizeof(vectors) / sizeof(vectors[0]); i++)
-    if (vector == vectors[i])
+  switch(vector) {
+    case 8:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 17:
+    case 21:
       return true;
-  return false;
+    default:
+      return false;
+  }
 }
 
 void interrupt_handler(Context* ctx) {
@@ -91,7 +99,6 @@ void interrupt_handler(Context* ctx) {
 }
 
 void interrupts_init() {
-  cpu_cli();
   void(*pushers[ID_NUM])() = PUSHERS_ARR;
   ID* idt = malloc_undead(ID_NUM * ID_SIZE, IDT_ALIGNMENT);
   for (size_t i = 0; i < ID_NUM; i++) {
@@ -107,6 +114,6 @@ void interrupts_init() {
   }
   cpu_lidt(&(IDTD){
     .limit = ID_NUM * ID_SIZE - 1,
-    .base = (u32)(uintptr_t)idt
+    .base  = (u32)(uintptr_t)idt
   });
 }
