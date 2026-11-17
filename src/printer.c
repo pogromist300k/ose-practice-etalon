@@ -32,6 +32,19 @@ void printer_init_color(VgaColor bg, VgaColor fg) {
   printer_init();
 }
 
+void printer_set_cursor(size_t x, size_t y) {
+  cursor.x = x % VGA_COLS;
+  cursor.y = y % VGA_ROWS;
+}
+
+size_t printer_get_cursor_x() {
+  return cursor.x % VGA_COLS;
+}
+
+size_t printer_get_cursor_y() {
+  return cursor.y % VGA_ROWS;
+}
+
 //---------------------------- PRINTF ----------------------------
 
 void printf(const char* fmt, ...) {
@@ -72,108 +85,108 @@ void vprintf(const char* fmt, va_list args) {
       width = WIDTH_MAX;
 
     switch(c) {
-      case 'd': {
-        char digits[DIGITS_MAX_10 + 1];
-        int num = va_arg(args, int);
-        unsigned unum = (num < 0) ? -(unsigned)num : (unsigned)num;
-        print_num(&(PrintNumParams){
-          .prefix     = (num < 0) ? "-" : "",
-          .digits     = uint_to_str(unum, digits, BASE_10),
-          .width      = width,
-          .zeros      = zeros,
-          .left_align = left_align,
-        });
+    case 'd': {
+      char digits[DIGITS_MAX_10 + 1];
+      int num = va_arg(args, int);
+      unsigned unum = (num < 0) ? -(unsigned)num : (unsigned)num;
+      print_num(&(PrintNumParams){
+        .prefix     = (num < 0) ? "-" : "",
+        .digits     = uint_to_str(unum, digits, BASE_10),
+        .width      = width,
+        .zeros      = zeros,
+        .left_align = left_align,
+      });
+      break;
+    }
+    case 'u': {
+      char digits[DIGITS_MAX_10 + 1];
+      print_num(&(PrintNumParams){
+        .prefix     = "",
+        .digits     = uint_to_str(va_arg(args, unsigned), digits, BASE_10),
+        .width      = width,
+        .zeros      = zeros,
+        .left_align = left_align,
+      });
+      break;
+    }
+    case 'x': {
+      char digits[DIGITS_MAX_16 + 1];
+      print_num(&(PrintNumParams){
+        .prefix     = (prefix) ? "0x" : "",
+        .digits     = uint_to_str(va_arg(args, unsigned), digits, BASE_16),
+        .width      = width,
+        .zeros      = zeros,
+        .left_align = left_align,
+      });
+      break;
+    }
+    case 'b': {
+      char digits[DIGITS_MAX_2 + 1];
+      print_num(&(PrintNumParams){
+        .prefix     = (prefix) ? "0b" : "",
+        .digits     = uint_to_str(va_arg(args, unsigned), digits, BASE_2),
+        .width      = width,
+        .zeros      = zeros,
+        .left_align = left_align,
+      });
+      break;
+    }
+    case 'p': {
+      char digits[2*DIGITS_PTR + 1];
+      memset(digits, '0', DIGITS_PTR);
+      uint_to_str((uintptr_t)va_arg(args, void*), &digits[DIGITS_PTR], BASE_16);
+      print_num(&(PrintNumParams){
+        .prefix     = "0x",
+        .digits     = &digits[strlen(&digits[DIGITS_PTR])],
+        .width      = width,
+        .zeros      = false,
+        .left_align = left_align,
+      });
+      break;
+    }
+    case 'c': {
+      if (width == 0) {
+        print_char_move_cursor(va_arg(args, int));
         break;
       }
-      case 'u': {
-        char digits[DIGITS_MAX_10 + 1];
-        print_num(&(PrintNumParams){
-          .prefix     = "",
-          .digits     = uint_to_str(va_arg(args, unsigned), digits, BASE_10),
-          .width      = width,
-          .zeros      = zeros,
-          .left_align = left_align,
-        });
+      char buff[WIDTH_MAX + 1];
+      memset(buff, ' ', width - 1);
+      buff[width - 1] = va_arg(args, int);
+      buff[width] = '\0';
+      if (left_align)
+        strrev(buff);
+      print_str(buff);
+      break;
+    }
+    case 's': {
+      const char* s = va_arg(args, char*);
+      if (s == NULL)
+        s = "(null)";
+      size_t sw = strlen(s);
+      size_t fw = (width > sw) ? width - sw : 0;
+      if (fw == 0) {
+        print_str(s);
         break;
       }
-      case 'x': {
-        char digits[DIGITS_MAX_16 + 1];
-        print_num(&(PrintNumParams){
-          .prefix     = (prefix) ? "0x" : "",
-          .digits     = uint_to_str(va_arg(args, unsigned), digits, BASE_16),
-          .width      = width,
-          .zeros      = zeros,
-          .left_align = left_align,
-        });
-        break;
+      char filler[WIDTH_MAX + 1];
+      memset(filler, ' ', fw);
+      filler[fw] = '\0';
+      if (left_align) {
+        print_str(s);
+        print_str(filler);
+      } else {
+        print_str(filler);
+        print_str(s);
       }
-      case 'b': {
-        char digits[DIGITS_MAX_2 + 1];
-        print_num(&(PrintNumParams){
-          .prefix     = (prefix) ? "0b" : "",
-          .digits     = uint_to_str(va_arg(args, unsigned), digits, BASE_2),
-          .width      = width,
-          .zeros      = zeros,
-          .left_align = left_align,
-        });
-        break;
-      }
-      case 'p': {
-        char digits[2*DIGITS_PTR + 1];
-        memset(digits, '0', DIGITS_PTR);
-        uint_to_str((uintptr_t)va_arg(args, void*), &digits[DIGITS_PTR], BASE_16);
-        print_num(&(PrintNumParams){
-          .prefix     = "0x",
-          .digits     = &digits[strlen(&digits[DIGITS_PTR])],
-          .width      = width,
-          .zeros      = false,
-          .left_align = left_align,
-        });
-        break;
-      }
-      case 'c': {
-        if (width == 0) {
-          print_char_move_cursor(va_arg(args, int));
-          break;
-        }
-        char buff[WIDTH_MAX + 1];
-        memset(buff, ' ', width - 1);
-        buff[width - 1] = va_arg(args, int);
-        buff[width] = '\0';
-        if (left_align)
-          strrev(buff);
-        print_str(buff);
-        break;
-      }
-      case 's': {
-        const char* s = va_arg(args, char*);
-        if (s == NULL)
-          s = "(null)";
-        size_t sw = strlen(s);
-        size_t fw = (width > sw) ? width - sw : 0;
-        if (fw == 0) {
-          print_str(s);
-          break;
-        }
-        char filler[WIDTH_MAX + 1];
-        memset(filler, ' ', fw);
-        filler[fw] = '\0';
-        if (left_align) {
-          print_str(s);
-          print_str(filler);
-        } else {
-          print_str(filler);
-          print_str(s);
-        }
-        break;
-      }
-      case '%':
-        print_char_move_cursor('%');
-        break;
-      default:
-        print_char_move_cursor('%');
-        print_char_move_cursor(c);
-        return;
+      break;
+    }
+    case '%':
+      print_char_move_cursor('%');
+      break;
+    default:
+      print_char_move_cursor('%');
+      print_char_move_cursor(c);
+      return;
     }
   }
 }

@@ -19,6 +19,12 @@ char* strrev(char* str) {
   return str;
 }
 
+char* strcpy(char* dst, const char* src) {
+  char* ret = dst;
+  while (*(dst++) = *(src++));
+  return ret;
+}
+
 char* uint_to_str(unsigned num, char* buff, byte base) {
   size_t i = 0;
   do {

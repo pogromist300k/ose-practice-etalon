@@ -12,7 +12,7 @@ static const char panic_art[] =
   " \\___)=(___/ |_|\\_\\_____|_| \\_\\_| \\_|_____|_____||_| /_/   \\_\\_| \\_|___\\____(_)";
 
 void kernel_panic(const char* fmt, ...) {
-  cpu_cli();
+  cli();
   va_list args;
   va_start(args, fmt);
   vkernel_panic(fmt, args);
@@ -20,9 +20,9 @@ void kernel_panic(const char* fmt, ...) {
 }
 
 void vkernel_panic(const char* fmt, va_list args) {
-  cpu_cli();
+  cli();
   printer_init_color(VGA_BLUE, VGA_WHITE);
   printf("%s\n\n", panic_art);
   vprintf(fmt, args);
-  cpu_halt();
+  halt();
 }

@@ -13,6 +13,7 @@
 
 size_t strlen(const char* str);
 char* strrev(char* str);
+char* strcpy(char* dst, const char* src);
 char* uint_to_str(unsigned num, char* buff, byte base);
 
 #endif

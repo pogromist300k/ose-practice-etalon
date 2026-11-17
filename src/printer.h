@@ -7,6 +7,9 @@
 
 void printer_init();
 void printer_init_color(VgaColor bg, VgaColor fg);
+void printer_set_cursor(size_t x, size_t y);
+size_t printer_get_cursor_x();
+size_t printer_get_cursor_y();
 void printf(const char* fmt, ...);
 void vprintf(const char* fmt, va_list args);
 

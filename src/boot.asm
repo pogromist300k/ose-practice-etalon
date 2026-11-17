@@ -1,6 +1,6 @@
-[BITS 16]
-
 ;======================= LOAD KERNEL =======================
+
+[BITS 16]
 
 cli
 mov CX, 1                    ; CH: cylinder number (C)  CL: sector number (S)
@@ -74,93 +74,108 @@ GDT:
 
 ;======================== UTILITIES ========================
 
+[GLOBAL loop]
+; void loop(size_t cycles)
+loop:
+  mov ECX, dword[ESP + 4]
+  test ECX, ECX
+  jz .ret
+ .loop:
+    pause
+    loop .loop
+ .ret:
+  ret
+
+[GLOBAL endless_loop]
+; void endless_loop()
+endless_loop:
+  jmp endless_loop
+
+;-------------------------- PORTS --------------------------
+
+[GLOBAL in]
+; byte in(word port)
+in:
+  mov DX, word[ESP + 4]
+  in  AL, DX
+  ret
+
+[GLOBAL out]
+; void out(word port, byte value)
+out:
+  mov DX, word[ESP + 4]
+  mov AL, byte[ESP + 8]
+  out DX, AL
+  ret
+
 ;--------------------------- CPU ---------------------------
 
-[GLOBAL cpu_cli]
-; void cpu_cli()
-cpu_cli:
+[GLOBAL cli]
+; void cli()
+cli:
   cli
   ret
 
-[GLOBAL cpu_sti]
-; void cpu_sti()
-cpu_sti:
+[GLOBAL sti]
+; void sti()
+sti:
   sti
   ret
 
-[GLOBAL cpu_halt]
-; void cpu_hlt()
-cpu_halt:
+[GLOBAL halt]
+; void hlt()
+halt:
   cli
   hlt
-
-[GLOBAL cpu_lidt]
-; void cpu_lidt(IDTD* idtd)
-cpu_lidt:
-  mov eax, dword[esp + 4]
-  lidt [eax]
-  ret
-
-[GLOBAL cpu_wait]
-; void cpu_wait(size_t cycles)
-cpu_wait:
-  mov ecx, dword[esp + 4]
-  test ecx, ecx
-  jz .ret
- .wait:
-    pause
-    loop .wait
- .ret:
-  ret
 
 ;------------------------- MEMORY --------------------------
 
 [GLOBAL memmove]
 ; void* memmove(void* dst, const void* src, size_t n)
 memmove:
-  push edi
-  push esi
-  mov  edi, dword[esp + 12]
-  mov  esi, dword[esp + 16]
-  mov  ecx, dword[esp + 20]
-  push edi
-  cmp  edi, esi
+  push EDI
+  push ESI
+  mov  EDI, dword[ESP + 12]
+  mov  ESI, dword[ESP + 16]
+  mov  ECX, dword[ESP + 20]
+  push EDI
+  cmp  EDI, ESI
   jb  .move
-  lea  edi, [edi + ecx - 1]
-  lea  esi, [esi + ecx - 1]
+  lea  EDI, [EDI + ECX - 1]
+  lea  ESI, [ESI + ECX - 1]
   std
  .move:
   rep  movsb
   cld
-  pop  eax
-  pop  esi
-  pop  edi
+  pop  EAX
+  pop  ESI
+  pop  EDI
   ret
 
 [GLOBAL memset]
 ; void* memset(void* dst, int b, size_t n)
 memset:
-  push edi
-  mov  edi, dword[esp +  8]
-  mov   al,  byte[esp + 12]
-  mov  ecx, dword[esp + 16]
-  push edi
+  push EDI
+  mov  EDI, dword[ESP +  8]
+  mov   AL,  byte[ESP + 12]
+  mov  ECX, dword[ESP + 16]
+  push EDI
   rep  stosb
-  pop  eax
-  pop  edi
+  pop  EAX
+  pop  EDI
   ret
 
 [GLOBAL memsetw]
 ; void* memsetw(void* dst, int w, size_t n)
 memsetw:
-  push edi
-  mov  edi, dword[esp +  8]
-  mov   ax,  word[esp + 12]
-  mov  ecx, dword[esp + 16]
-  push edi
+  push EDI
+  mov  EDI, dword[ESP +  8]
+  mov   AX,  word[ESP + 12]
+  mov  ECX, dword[ESP + 16]
+  push EDI
   rep  stosw
-  pop  eax
-  pop  edi
+  pop  EAX
+  pop  EDI
   ret
 
 times 510-($-$$) db 0

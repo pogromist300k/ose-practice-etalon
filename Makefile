@@ -1,83 +1,75 @@
-# =============================================================================
-# Инженерия операционных систем — Лабораторная №2
-# =============================================================================
-
-# --- Инструменты -------------------------------------------------------------
-
 NASM    = nasm
 GCC     = gcc
 LD      = ld
 OBJCOPY = objcopy
 QEMU    = qemu-system-i386
 
-NASMFLAGS    = -f elf
-CFLAGS       = -std=c99 -m32 -O2 -ffreestanding -no-pie -fno-pie \
-               -mno-sse -fno-stack-protector
-LDFLAGS      = -m elf_i386 -T link.ld
-OBJCOPYFLAGS = -I elf32-i386 -O binary
-QEMUFLAGS    = -cpu pentium2 -m 1g -fda boot.img -monitor stdio -device VGA
+# Selectors: общие для ASM и C
+CODE_SELECTOR = 0x08
+DATA_SELECTOR = 0x10
 
-# --- Пути --------------------------------------------------------------------
+# Какой тест собираем: src/tests/test_$(TEST).c
+TEST = hello_world
 
-SRC     = src
-TMP     = .tmp
-LINKER  = link.ld
+SRC = src
+TMP = .tmp
 
-VBR_SRC    = $(SRC)/boot.asm
-KERNEL_SRC = $(SRC)/kernel.c
-VBR_OBJ    = $(TMP)/boot.o
-C_SRCS     = $(wildcard $(SRC)/*.c)
-C_OBJS     = $(patsubst $(SRC)/%.c, $(TMP)/%.o, $(C_SRCS))
-HDRS       = $(wildcard $(SRC)/*.h)
-OS_ELF     = $(TMP)/os.elf
-OS_BIN     = $(TMP)/os.bin
-IMAGE      = boot.img
+CFLAGS_COMMON = -I$(SRC) -std=c99 -m32 -ffreestanding -no-pie -fno-pie \
+                -mno-sse -fno-stack-protector \
+                -DCODE_SELECTOR=$(CODE_SELECTOR) -DDATA_SELECTOR=$(DATA_SELECTOR)
+NASMFLAGS     = -f elf -dCODE_SELECTOR=$(CODE_SELECTOR) -dDATA_SELECTOR=$(DATA_SELECTOR)
+LDFLAGS       = -m elf_i386 -T link.ld
 
-# =============================================================================
-# Сборка
+ifeq ($(MAKECMDGOALS),debug)
+  CFLAGS    = $(CFLAGS_COMMON) -O0 -g -DDEBUG_MODE
+  QEMUFLAGS = -cpu pentium2 -m 1g -fda boot.img -monitor stdio -device VGA -s -S
+else
+  CFLAGS    = $(CFLAGS_COMMON) -O2
+  QEMUFLAGS = -cpu pentium2 -m 1g -fda boot.img -monitor stdio -device VGA
+endif
 
-all: build
+HDRS     = $(wildcard $(SRC)/*.h)
+C_SRCS   = $(wildcard $(SRC)/*.c) $(wildcard $(SRC)/tests/test_$(TEST).c)
+ASM_SRCS = $(filter-out $(SRC)/boot.asm,$(wildcard $(SRC)/*.asm)) \
+           $(wildcard $(SRC)/tests/test_$(TEST).asm)
 
-# --- Объектные файлы ---------------------------------------------------------
+C_OBJS   = $(patsubst $(SRC)/%.c,$(TMP)/%.o,$(C_SRCS))
+ASM_OBJS = $(patsubst $(SRC)/%.asm,$(TMP)/asm/%.o,$(ASM_SRCS))
 
-$(VBR_OBJ): $(VBR_SRC) $(C_OBJS) | $(TMP)
-	$(NASM) $(NASMFLAGS) -dN=$$(du -cb $(C_OBJS) | tail -1 | cut -f1) $< -o $@
+VBR_OBJ = $(TMP)/boot.o
+OS_ELF  = $(TMP)/os.elf
+OS_BIN  = $(TMP)/os.bin
+IMAGE   = boot.img
 
-$(TMP)/%.o: $(SRC)/%.c $(HDRS) | $(TMP)
-	$(GCC) $(CFLAGS) -c $< -o $@
-
-# --- Линковка и бинарь -------------------------------------------------------
-
-$(OS_ELF): $(VBR_OBJ) $(C_OBJS) $(LINKER)
-	$(LD) $(LDFLAGS) $(VBR_OBJ) $(C_OBJS) -o $@
-
-$(OS_BIN): $(OS_ELF)
-	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
-
-# --- Образ дискеты -----------------------------------------------------------
+all: $(IMAGE)
 
 $(IMAGE): $(OS_BIN)
 	dd if=/dev/zero of=$@ bs=512 count=2880
-	dd if=$(OS_BIN) of=$@ conv=notrunc
+	dd if=$< of=$@ conv=notrunc
 
-# --- Служебное ---------------------------------------------------------------
+$(OS_BIN): $(OS_ELF)
+	$(OBJCOPY) -I elf32-i386 -O binary $< $@
 
-$(TMP):
-	mkdir -p $(TMP)
+$(OS_ELF): $(VBR_OBJ) $(C_OBJS) $(ASM_OBJS) link.ld
+	$(LD) $(LDFLAGS) $(VBR_OBJ) $(C_OBJS) $(ASM_OBJS) -o $@
+
+$(VBR_OBJ): $(SRC)/boot.asm $(C_OBJS) $(ASM_OBJS)
+	@mkdir -p $(TMP)
+	$(NASM) $(NASMFLAGS) -dN=$$(cat $(C_OBJS) $(ASM_OBJS) | wc -c) $< -o $@
+
+$(TMP)/%.o: $(SRC)/%.c $(HDRS)
+	@mkdir -p $(@D)
+	$(GCC) $(CFLAGS) -c $< -o $@
+
+$(TMP)/asm/%.o: $(SRC)/%.asm
+	@mkdir -p $(@D)
+	$(NASM) $(NASMFLAGS) $< -o $@
+
+test debug: $(IMAGE)
+	$(QEMU) $(QEMUFLAGS)
 
 clean:
 	rm -f *.img
 	rm -rf $(TMP)
-	mkdir -p $(TMP)
 
-build: $(IMAGE)
-
-test: $(IMAGE)
-	$(QEMU) $(QEMUFLAGS)
-
-debug: $(IMAGE)
-	$(QEMU) $(QEMUFLAGS) -s -S &
-	sleep 1
-	gdb
-
-.PHONY: all build clean test debug
+.PHONY: all test debug clean

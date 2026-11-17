@@ -1535,18 +1535,34 @@ context_collector:
   push GS
   pusha
 
-cld
-mov AX, DATA_SELECTOR
-mov DS, AX
-mov ES, AX
-mov FS, AX
-mov GS, AX
+  cld
+  mov AX, DATA_SELECTOR
+  mov DS, AX
+  mov ES, AX
+  mov FS, AX
+  mov GS, AX
 
-mov EBX, ESP
-sub ESP, 4
-and ESP, -16
-mov dword[ESP], EBX
+  mov EBX, ESP
+  sub ESP, 4
+  and ESP, -16
+  mov dword[ESP], EBX
 
-[EXTERN interrupt_handler]
-; void interrupt_handler(Context* ctx)
-call interrupt_handler
+  [EXTERN interrupt_handler]
+  ; void interrupt_handler(Context* ctx)
+  call interrupt_handler
+
+  mov ESP, EBX
+  popa
+  pop GS
+  pop FS
+  pop ES
+  pop DS
+  add ESP, 8
+  iret
+
+[GLOBAL lidt]
+; void lidt(IDTd* IDT_descriptor_ptr)
+lidt:
+  mov   EAX, dword[ESP + 4]
+  lidt [EAX]
+  ret
