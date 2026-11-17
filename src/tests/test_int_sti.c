@@ -1,7 +1,7 @@
+#include "interrupts.h"
 #include "printer.h"
 #include "utils.h"
 #include "cpu.h"
-#include "interrupts.h"
 
 void div_zero();
 
@@ -10,11 +10,11 @@ void test() {
   printf("================================================================================\n");
   printf("                            TEST: Set Interrupt Flag                            \n");
   printf("================================================================================\n");
-  sleep(30);
+  sleep_visual(50);
 
-  interrupts_init();
+  interrupts_init(INTERRUPT_GATE);
   printf(" sti()...");
-  sleep(100);
-  cpu_sti();
-  sleep(1000);
+  sleep_visual(100);
+  sti();
+  sleep_visual(1000);
 }

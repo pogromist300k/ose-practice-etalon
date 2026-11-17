@@ -6,5 +6,5 @@ sys_call:
   mov  EBX, 0xBBBBBBBB
   mov  ECX, 0xCCCCCCCC
   mov  EDX, 0xDDDDDDDD
-  int  0x80
+  int  228
   ret

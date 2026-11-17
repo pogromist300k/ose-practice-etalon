@@ -1,8 +1,8 @@
-#include "printer.h"
 #include "allocator.h"
+#include "printer.h"
 #include "utils.h"
 
-#define SIZE       1488
+#define SIZE       (1337 + 1488)
 #define ALIGNMENT  1
 #define HEAP_START ((byte*)0x00100000)
 #define HEAP_END   ((byte*)0x00400000)
@@ -13,15 +13,14 @@ void test() {
   printf("================================================================================\n");
   printf("                         TEST: Allocation Out of Memory                         \n");
   printf("================================================================================\n");
-  sleep(30);
+  sleep_visual(50);
 
   size_t allocated = 0;
   while (allocated <= HEAP_SIZE - SIZE) {
     printf(" %p\n", malloc_undead(SIZE, ALIGNMENT));
     allocated += SIZE;
   }
-  printf("\n Now triggering panic..."
-         "\n   >> malloc_undead(%u, %u);", SIZE, ALIGNMENT);
-  sleep(100);
+  printf("\n Now triggering panic...");
+  sleep_visual(100);
   malloc_undead(SIZE, ALIGNMENT);
 }

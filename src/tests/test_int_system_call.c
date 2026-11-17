@@ -1,6 +1,6 @@
+#include "interrupts.h"
 #include "printer.h"
 #include "utils.h"
-#include "interrupts.h"
 
 void sys_call();
 
@@ -9,10 +9,10 @@ void test() {
   printf("================================================================================\n");
   printf("                              TEST: System Calling                              \n");
   printf("================================================================================\n");
-  sleep(30);
+  sleep_visual(50);
 
-  interrupts_init();
+  interrupts_init(INTERRUPT_GATE);
   printf(" Let's make a system call...");
-  sleep(100);
+  sleep_visual(100);
   sys_call();
 }
