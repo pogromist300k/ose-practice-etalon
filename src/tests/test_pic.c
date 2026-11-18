@@ -17,7 +17,7 @@ static void tmp_keyboard_handler() {}
 void test() {
   printer_init_color(VGA_LIGHT_MAGENTA, VGA_WHITE);
   printf("================================================================================\n");
-  printf("                                TEST: PIC 8529 #%-2u                              \n", EXPERIMENT);
+  printf("                                TEST: PIC 8259 #%-2u                              \n", EXPERIMENT);
   printf("================================================================================\n");
   sleep_visual(50);
 
