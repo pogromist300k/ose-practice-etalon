@@ -10,11 +10,10 @@ void test() {
   printf("================================================================================\n");
   printf("                            TEST: Set Interrupt Flag                            \n");
   printf("================================================================================\n");
-  sleep_visual(50);
 
   interrupts_init(INTERRUPT_GATE);
   printf(" sti()...");
-  sleep_visual(100);
+  sleep_visual(10);
   sti();
-  sleep_visual(1000);
+  sleep_visual(10);
 }

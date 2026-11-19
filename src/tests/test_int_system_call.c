@@ -9,10 +9,9 @@ void test() {
   printf("================================================================================\n");
   printf("                              TEST: System Calling                              \n");
   printf("================================================================================\n");
-  sleep_visual(50);
 
   interrupts_init(INTERRUPT_GATE);
   printf(" Let's make a system call...");
-  sleep_visual(100);
+  sleep_visual(10);
   sys_call();
 }

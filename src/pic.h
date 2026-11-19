@@ -7,7 +7,7 @@
 
 typedef enum {
   PIC_TIMER    = 0,
-  PIC_KEYBOARD = 1
+  PIC_KEYBOARD = 1,
 } PicDevice;
 
 void pic_init(bool AEOI);

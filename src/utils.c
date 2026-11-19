@@ -1,21 +1,23 @@
 #include "utils.h"
 #include "printer.h"
 
-#define CYCLES_PER_MS (1 << 17)
+#define CYCLES_PER_S 250000000
 
-void sleep(word ms) {
-  if (0 < ms && ms < 1 << 15)
-    loop(ms * CYCLES_PER_MS);
+void loop(unsigned cycles);
+
+void sleep(unsigned s) {
+  while (s--)
+    loop(CYCLES_PER_S);
 }
 
-void sleep_visual(word cycles) {
-  for (word i = cycles; i > 0; i--) {
-    sleep(1);
-    printf(" %-5u", i);
-    printer_set_cursor(printer_get_cursor_x() - 6, printer_get_cursor_y());
+void sleep_visual(unsigned s) {
+  while (s) {
+    printf(" %-5u", s--);
+    loop(CYCLES_PER_S);
+    cursor_set_x(cursor_x() - 6);
   }
   printf("  ");
-  printer_set_cursor(printer_get_cursor_x() - 2, printer_get_cursor_y());
+  cursor_set_x(cursor_x() - 2);
 }
 
 bool is_power_of_2(unsigned num) {
@@ -26,6 +28,10 @@ unsigned bit_set(unsigned num, byte bit) {
   return num | (1 << bit);
 }
 
-unsigned bit_clear(unsigned num, byte bit) {
+unsigned bit_reset(unsigned num, byte bit) {
   return num & ~(1 << bit);
+}
+
+unsigned bit_get(unsigned num, byte bit) {
+  return (num >> bit) & 1;
 }

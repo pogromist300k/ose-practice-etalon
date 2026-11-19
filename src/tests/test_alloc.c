@@ -11,7 +11,6 @@ void test() {
   printf("================================================================================\n");
   printf("                             TEST: Allocation Basic                             \n");
   printf("================================================================================\n");
-  sleep_visual(50);
 
   byte* start = (byte*)malloc_undead(SIZE, ALIGNMENT);
   printf(" %p\n", start);

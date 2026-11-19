@@ -19,7 +19,7 @@ void test() {
   printf("================================================================================\n");
   printf("                                TEST: PIC 8259 #%-2u                              \n", EXPERIMENT);
   printf("================================================================================\n");
-  sleep_visual(50);
+  sleep_visual(5);
 
   timer_handler    = tmp_timer_handler;
   keyboard_handler = tmp_keyboard_handler;

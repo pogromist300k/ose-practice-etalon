@@ -81,7 +81,6 @@ loop:
   test ECX, ECX
   jz .ret
  .loop:
-    pause
     loop .loop
  .ret:
   ret

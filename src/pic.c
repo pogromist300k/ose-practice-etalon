@@ -2,24 +2,23 @@
 #include "ports.h"
 #include "utils.h"
 
+#define IRQS_NUM         8
+#define IRQ_SLAVE        2
+#define ICWS_NUM         4
+#define ICW1             0x11
+#define ICW2_MASTER      PIC_VECTORS
+#define ICW2_SLAVE       (PIC_VECTORS + IRQS_NUM)
+#define ICW3_MASTER      (1 << IRQ_SLAVE)
+#define ICW3_SLAVE       IRQ_SLAVE
 #define CMD_PORT_MASTER  0x20
 #define CMD_PORT_SLAVE   0xA0
 #define DATA_PORT_MASTER 0x21
 #define DATA_PORT_SLAVE  0xA1
 #define EOI              0x20
-#define ICWS_NUM         4
-#define ICW1             0b00010001
-#define ICW2_MASTER      32
-#define ICW2_SLAVE       40
-#define ICW3_MASTER      0b00000100
-#define ICW3_SLAVE       2
-#define ICW4             0b00000001
-#define ICW4_AEOI        0b00000011
-#define DEVICES_NUM      8
 #define DELAY_PORT       0x80
-#define DELAY_CYCLES     100
+#define DELAY_CYCLES     1337
 
-static byte devices_master = 0xFF;
+static byte devices_master = 0xDF;
 static byte devices_slave  = 0xFF;
 
 static void init_command(word cmd_port, word data_port, const byte* icws) {
@@ -32,7 +31,7 @@ static void init_command(word cmd_port, word data_port, const byte* icws) {
 }
 
 void pic_init(bool AEOI) {
-  byte icw4 = (AEOI) ? ICW4_AEOI : ICW4;
+  byte icw4 = 0x01 | ((AEOI) ? 0x02 : 0);
   byte icws_master[] = {ICW1, ICW2_MASTER, ICW3_MASTER, icw4};
   byte icws_slave[]  = {ICW1, ICW2_SLAVE,  ICW3_SLAVE,  icw4};
   init_command(CMD_PORT_MASTER, DATA_PORT_MASTER, icws_master);
@@ -42,24 +41,24 @@ void pic_init(bool AEOI) {
 }
 
 void pic_EOI(PicDevice device) {
-  if (DEVICES_NUM <= device)
+  if (IRQS_NUM <= device)
     out(CMD_PORT_SLAVE, EOI);
   out(CMD_PORT_MASTER, EOI);
 }
 
 static void device_switch(PicDevice device, unsigned(*bit_func)(unsigned, byte)) {
-  if (device < DEVICES_NUM) {
+  if (device < IRQS_NUM) {
     devices_master = (byte)bit_func(devices_master, device);
     out(DATA_PORT_MASTER, devices_master);
   }
   else {
-    devices_slave = (byte)bit_func(devices_slave, device - DEVICES_NUM);
+    devices_slave = (byte)bit_func(devices_slave, device - IRQS_NUM);
     out(DATA_PORT_SLAVE, devices_slave);
   }
 }
 
 void pic_enable(PicDevice device) {
-  device_switch(device, bit_clear);
+  device_switch(device, bit_reset);
 }
 
 void pic_disable(PicDevice device) {

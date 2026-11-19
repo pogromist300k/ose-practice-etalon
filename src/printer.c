@@ -32,17 +32,22 @@ void printer_init_color(VgaColor bg, VgaColor fg) {
   printer_init();
 }
 
-void printer_set_cursor(size_t x, size_t y) {
-  cursor.x = x % VGA_COLS;
-  cursor.y = y % VGA_ROWS;
-}
+//---------------------------- CURSOR ----------------------------
 
-size_t printer_get_cursor_x() {
+size_t cursor_x() {
   return cursor.x % VGA_COLS;
 }
 
-size_t printer_get_cursor_y() {
+size_t cursor_y() {
   return cursor.y % VGA_ROWS;
+}
+
+void cursor_set_x(size_t x) {
+  cursor.x = x % VGA_COLS;
+}
+
+void cursor_set_y(size_t y) {
+  cursor.y = y % VGA_ROWS;
 }
 
 //---------------------------- PRINTF ----------------------------

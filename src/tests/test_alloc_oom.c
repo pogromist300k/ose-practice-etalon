@@ -13,7 +13,7 @@ void test() {
   printf("================================================================================\n");
   printf("                         TEST: Allocation Out of Memory                         \n");
   printf("================================================================================\n");
-  sleep_visual(50);
+  sleep_visual(5);
 
   size_t allocated = 0;
   while (allocated <= HEAP_SIZE - SIZE) {
@@ -21,6 +21,6 @@ void test() {
     allocated += SIZE;
   }
   printf("\n Now triggering panic...");
-  sleep_visual(100);
+  sleep_visual(10);
   malloc_undead(SIZE, ALIGNMENT);
 }

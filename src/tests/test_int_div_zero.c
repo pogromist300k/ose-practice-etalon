@@ -9,10 +9,9 @@ void test() {
   printf("================================================================================\n");
   printf("                             TEST: Division By Zero                             \n");
   printf("================================================================================\n");
-  sleep_visual(50);
 
   interrupts_init(INTERRUPT_GATE);
   printf(" Let me divide by zero...");
-  sleep_visual(100);
+  sleep_visual(10);
   div_zero();
 }

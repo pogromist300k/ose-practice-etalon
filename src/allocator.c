@@ -31,7 +31,5 @@ void* malloc_undead(size_t size, size_t alignment) {
 }
 
 void* calloc_undead(size_t size, size_t alignment) {
-  void* ptr = malloc_undead(size, alignment);
-  memset(ptr, 0, size);
-  return ptr;
+  return memset(malloc_undead(size, alignment), 0, size);
 }

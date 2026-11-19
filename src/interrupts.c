@@ -29,11 +29,13 @@ typedef struct {
 typedef struct {
   u16 limit : 16;
   u32 base  : 32;
-} IDTd;
+} IDTR;
 
 #pragma pack(pop)
 
-void lidt(IDTd* IDT_descriptor_ptr);
+//----------------------------------------------------------------------------------------------------------
+
+void lidt(IDTR* ptr);
 
 void interrupts_init(GateType type) {
   void(*pushers[IDS_NUM])() = PUSHERS_ARR;
@@ -49,13 +51,15 @@ void interrupts_init(GateType type) {
       .offset_48_63 = (u16)(((uintptr_t)pushers[i] >> 16)),
     };
   }
-  lidt(&(IDTd){
+  lidt(&(IDTR){
     .limit = IDS_NUM * ID_SIZE - 1,
     .base  = (u32)(uintptr_t)idt
   });
 }
 
 //================================================ HANDLING ================================================
+
+#define EFLAGS_STR_SIZE 68
 
 typedef struct {
   u32 EDI;
@@ -77,14 +81,12 @@ typedef struct {
   u32 EFLAGS;
 } Context;
 
-#define EFLAGS_STR_SIZE 68
-
 static const char context_fmt[] = 
   " Unhandled interrupt #%u at %#06x:%#010x\n\n"
   " EAX | %#010x | EBX | %#010x | ECX | %#010x | EDX | %#010x\n"
   " ESP | %#010x | EBP | %#010x | ESI | %#010x | EDI | %#010x\n"
   " DS  | %#06x     | ES  | %#06x     | FS  | %#06x     | GS  | %#06x\n\n"
-  " Error Code: %-s\n\n"
+  " Error Code: %s\n\n"
   "         RESERVED   ID VIP VIF AC VM RF  NT IOPL OF DF IF TF SF ZF  AF  PF  CF\n"
   " EFLAGS: %s";
 
@@ -127,8 +129,9 @@ static bool has_err_code(u32 vector) {
 //   ...
 // }
 
-void(*timer_handler)() = NULL;
-void(*keyboard_handler)() = NULL;
+static void noop() {}
+void(*timer_handler)() = noop;
+void(*keyboard_handler)() = noop;
 
 void interrupt_handler(Context* ctx) {
   switch (ctx->vector) {

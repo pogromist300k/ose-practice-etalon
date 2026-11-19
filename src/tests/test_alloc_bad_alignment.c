@@ -12,13 +12,12 @@ void test() {
   printf("================================================================================\n");
   printf("                         TEST: Allocation Bad Alignment                         \n");
   printf("================================================================================\n");
-  sleep_visual(50);
 
   for (size_t a = START_ALIGNMENT; a <= END_ALIGNMENT; a *= 2) {
     printf(" Alignment: %-7u | Address: %#032b\n", a, (uintptr_t)malloc_undead(SIZE, a));
-    sleep(10);
+    sleep(1);
   }
   printf("\n Now triggering panic with bad alignment...");
-  sleep_visual(100);
+  sleep_visual(10);
   malloc_undead(SIZE, BAD_ALIGNMENT); 
 }
