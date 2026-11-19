@@ -1,7 +1,7 @@
 #include "vga.h"
 #include "mem.h"
 
-#define PLACE_SIZE  2
+#define PLACE_SIZE 2
 #define START      ((word*)0x000B8000)
 #define ADDR(x, y) (START + (y)*VGA_COLS + x)
 
